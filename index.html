@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestra Historia ❤️</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --rosa-fuerte: #ff4d6d; --rosa-pastel: #fff0f3;
+            --dorado: #d4af37; --blanco: #ffffff; --texto: #4a4a4a;
+            --verde-exito: #4caf50; --rojo-error: #ff5252;
+        }
+        body { 
+            font-family: 'Arial Rounded MT Bold', sans-serif; 
+            background-color: var(--rosa-pastel); margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden; color: var(--texto);
+        }
+
+        .alerta-boda {
+            background: linear-gradient(45deg, var(--dorado), #ffdb58);
+            color: #fff; width: 100%; padding: 10px 0; text-align: center;
+            font-weight: bold; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(212, 175, 55, 0.4);
+            z-index: 200;
+        }
+
+        .seccion {
+            display: none; width: 100%; padding: 15px; box-sizing: border-box;
+            overflow-y: auto; height: calc(100vh - 110px); animation: fadeIn 0.4s;
+            padding-bottom: 100px;
+        }
+        .activa { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card {
+            background: var(--blanco); border-radius: 25px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(255, 77, 109, 0.08); text-align: center;
+        }
+
+        .carrusel-contenedor { position: relative; width: 260px; margin: 0 auto; }
+        .polaroid {
+            background: white; padding: 10px 10px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            border: 1px solid #eee; width: 100%; box-sizing: border-box; transform: rotate(-2deg);
+        }
+        .polaroid img { width: 100%; height: 220px; object-fit: cover; border-radius: 2px; transition: opacity 0.3s; }
+        .btn-carrusel {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: var(--rosa-fuerte); color: white; border: none;
+            width: 35px; height: 35px; border-radius: 50%; cursor: pointer; z-index: 10;
+        }
+        .btn-prev { left: -45px; } .btn-next { right: -45px; }
+
+        .video-container {
+            position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+            border-radius: 15px; background: #000;
+        }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+        .cupones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .cupon {
+            background: #fdf0f2; color: var(--rosa-fuerte); border: 1px solid var(--rosa-pastel);
+            padding: 12px; border-radius: 12px; font-weight: bold; font-size: 0.8rem;
+            transition: all 0.2s; cursor: pointer;
+        }
+        .usado { background: #eee !important; color: #aaa !important; text-decoration: line-through; transform: scale(0.9); }
+
+        .razon { background: #fff8f9; border-radius: 12px; margin: 10px 0; border: 1px solid var(--rosa-pastel); text-align: left; }
+        .razon-header { padding: 15px; cursor: pointer; font-weight: bold; color: var(--rosa-fuerte); display: flex; justify-content: space-between; }
+        .razon-content { max-height: 0; padding: 0 15px; transition: 0.3s ease; color: #666; font-size: 0.85rem; overflow: hidden; }
+
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; height: 70px;
+            background: var(--blanco); display: flex; justify-content: space-around; 
+            align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 100;
+        }
+        .nav-item { border: none; background: none; color: #ccc; font-size: 0.6rem; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .nav-item.active { color: var(--rosa-fuerte); }
+        .nav-item i { font-size: 1.3rem; margin-bottom: 3px; font-style: normal; }
+        
+        .opcion-juego { 
+            background: #fff0f3; padding: 12px; margin: 8px 0; border-radius: 12px; 
+            cursor: pointer; color: var(--rosa-fuerte); font-weight: bold; border: 1px solid #ffb3c1;
+            transition: background 0.3s;
+        }
+        .opcion-correcta { background: var(--verde-exito) !important; color: white !important; }
+        .opcion-incorrecta { background: var(--rojo-error) !important; color: white !important; }
+    </style>
+</head>
+<body>
+
+    <div class="alerta-boda" id="alertaBoda">Calculando...</div>
+
+    <div id="inicio" class="seccion activa">
+        <div class="card">
+            <h3>Para mi futura esposa ❤️</h3>
+            <p style="font-size: 0.85rem; color: #666; font-style: italic; line-height: 1.5;">
+                "Hice este rincón digital porque un amor como el nuestro merece existir en todas partes. Esto es solo el principio de nuestra eternidad... TE AMO"
+            </p>
+        </div>
+        <div class="card">
+            <div style="font-size: 3rem;">💍</div>
+            <h2 id="contador">Cargando...</h2>
+        </div>
+        <div class="card" style="padding: 40px 10px;">
+            <div class="carrusel-contenedor">
+                <button class="btn-carrusel btn-prev" onclick="cambiarFoto(-1)">❮</button>
+                <div class="polaroid">
+                    <img id="foto-nosotros" src="" alt="Nosotros">
+                    <p id="pie-foto" style="margin: 10px 0 0; font-size: 0.8rem; font-family: 'Brush Script MT', cursive;">Cargando...</p>
+                </div>
+                <button class="btn-carrusel btn-next" onclick="cambiarFoto(1)">❯</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="diario" class="seccion">
+        <div class="card">
+            <h3>Nuestras 10 Razones 📖</h3>
+            <div id="contenedor-razones"></div>
+        </div>
+    </div>
+
+    <div id="regalos" class="seccion">
+        <div class="card">
+            <h3>Tus Vales 🎫</h3>
+            <div class="cupones-grid">
+                <button class="cupon" onclick="canjear(this)">🎬 Cine VIP</button>
+                <button class="cupon" onclick="canjear(this)">🍕 Noche de Pizza</button>
+                <button class="cupon" onclick="canjear(this)">💆‍♂️ Masajito</button>
+                <button class="cupon" onclick="canjear(this)">🍦 Heladito</button>
+                <button class="cupon" onclick="canjear(this)">🥞 Desayuno en cama</button>
+                <button class="cupon" onclick="canjear(this)">👗 Shoppingsito</button>
+                <button class="cupon" onclick="canjear(this)" style="grid-column: span 2; background: #ffe5ec; border: 2px dashed var(--rosa-fuerte);">✨ Comodín Especial</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="musica" class="seccion">
+        <div class="card">
+            <p style="font-size: 1.2rem; color: var(--rosa-fuerte); font-weight: bold; margin-bottom: 20px;">
+                "Cada vez que escuches esta letra, recuerda que fue escrita para nosotros."
+            </p>
+            <div class="video-container">
+                <iframe 
+    src="https://www.youtube.com/embed/n3n-N987TIs" 
+    title="Nuestra Canción" 
+    frameborder="0" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+    referrerpolicy="strict-origin-when-cross-origin" 
+    allowfullscreen>
+</iframe>
+            </div>
+        </div>
+    </div>
+
+    <div id="juegos" class="seccion">
+        <div class="card">
+            <h3>Trivia de Nosotros 🎲</h3>
+            <div id="preguntas-box"></div>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <button class="nav-item active" onclick="ver('inicio', this)"><i>🏠</i>Inicio</button>
+        <button class="nav-item" onclick="ver('diario', this)"><i>📖</i>Diario</button>
+        <button class="nav-item" onclick="ver('regalos', this)"><i>🎁</i>Vales</button>
+        <button class="nav-item" onclick="ver('musica', this)"><i>🎥</i>Video</button>
+        <button class="nav-item" onclick="ver('juegos', this)"><i>🎲</i>Juego</button>
+    </nav>
+
+<script>
+    const fechaNovios = new Date(2023, 2, 26);
+    const fechaBoda = new Date(2026, 3, 11);
+
+    const fotosDrive = [
+        { id: "1vDUcE-hYPYN5XUaJP0mTEpZy7z1UYcEy", texto: "Nuestro primer partido de SULTANES" },
+        { id: "14bnQyUZIPxh9tWVRhKfk4Q0ZZvqwS1OM", texto: "Dandome tu apoyo siempre" },
+        { id: "1p2M6d7rKhH2Ug8G2LgkjNWz25I2OnTJx", texto: "Nuestra primer foto en nuestra primer casita juntos" },
+        { id: "1TM1QWgCHgXXdY1RQrzAMTLrSTamnfvyw", texto: "El tiempo pasa volando" },
+        { id: "1pCOHQmUjqkW5fDh89q6nw-QYLSZTX3T8", texto: "Mi reina en San Piter"},
+        { id: "1jGrHhbb3vE1bdHDlKb-7qnkn-A4ofCg2", texto: "Vinito juntos"}
+    ];
+
+    let fotoActual = 0;
+    function obtenerLink(id) { return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`; }
+    
+    function cambiarFoto(dir) {
+        fotoActual = (fotoActual + dir + fotosDrive.length) % fotosDrive.length;
+        const img = document.getElementById('foto-nosotros');
+        img.style.opacity = 0;
+        setTimeout(() => {
+            img.src = obtenerLink(fotosDrive[fotoActual].id);
+            document.getElementById('pie-foto').innerText = fotosDrive[fotoActual].texto;
+            img.style.opacity = 1;
+        }, 300);
+    }
+
+    // --- DIARIO (Tus textos restaurados y corregidos) ---
+    const razones = [
+        ["Tu Sonrisa", "Porque ilumina mi mundo."],
+        ["Tu Apoyo", "Nunca me dejas solo."],
+        ["Tu Paciencia", "Por cómo me entiendes."],
+        ["Tu Fuerza", "Me motivas a seguir."],
+        ["Tus Detalles", "Haces todo especial."],
+        ["Tu Risa", "Mi sonido favorito."],
+        ["Tu Mirada", "Me da mucha paz."],
+        ["Tu Corazón", "El lugar más noble."],
+        ["Nuestros Sueños", "Juntos por siempre."],
+        ["Tu 'Sí'", "Gracias por elegirme."]
+    ];
+
+    const contR = document.getElementById('contenedor-razones');
+    razones.forEach((r, i) => {
+        contR.innerHTML += `<div class="razon"><div class="razon-header" onclick="toggleRazon(this)">${i+1}. ${r[0]} <span>+</span></div><div class="razon-content"><p>${r[1]}</p></div></div>`;
+    });
+
+    // --- TRIVIA (Tus textos restaurados y corregidos) ---
+    const triviaData = [
+        { p: "¿Mes de nuestro primer baile?", o: ["Marzo", "Abril", "Mayo"], r: 0 },
+        { p: "¿Postre favorito?", o: ["Pastel", "Carlota", "Brownie"], r: 1 },
+        { p: "¿Quién dijo 'Te amo' primero?", o: ["Tú", "Yo", "Ambos"], r: 1 },
+        { p: "¿Primera cita?", o: ["Suchitlán", "Parque", "Café"], r: 0 },
+        { p: "¿Color favorito?", o: ["Azul", "Negro", "Rojo"], r: 2 },
+        { p: "¿Primera película?", o: ["Superhéroes", "Comedia", "Drama"], r: 0 },
+        { p: "¿Mayor sueño?", o: ["Viajar", "Hogar", "Hijos"], r: 1 },
+        { p: "¿Apodo?", o: ["Babe", "Papi", "Gordo"], r: 0 },
+        { p: "¿Mi niña chiquita?", o: ["No sé", "La Patrona", "Quién sabe"], r: 1 },
+        { p: "¿Te elegiría de nuevo?", o: ["Sí", "Obvio", "Mil veces sí"], r: 2 }
+    ];
+
+    let idxT = 0, pts = 0;
+
+    function cargarTrivia() {
+        const box = document.getElementById('preguntas-box');
+        if(idxT < triviaData.length) {
+            const d = triviaData[idxT];
+            box.innerHTML = `<p><strong>${idxT+1}/10</strong>: ${d.p}</p>` + 
+                d.o.map((o, i) => `<div class="opcion-juego" onclick="check(${i}, this)">${o}</div>`).join('');
+        } else {
+            box.innerHTML = `<h4>¡Fin de la trivia! ❤️</h4><p>Puntaje: ${pts}/10</p>
+            ${pts >= 8 ? '<p>¡Me conoces perfectamente! 😍</p>' : '<p>¡Te amo muchísimo! ❤️</p>'}`;
+        }
+    }
+
+    window.check = (i, el) => {
+        const correcta = triviaData[idxT].r;
+        if(i === correcta) {
+            el.classList.add('opcion-correcta');
+            pts++;
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        } else {
+            el.classList.add('opcion-incorrecta');
+        }
+        setTimeout(() => { idxT++; cargarTrivia(); }, 1000);
+    };
+
+    function actualizar() {
+        const ahora = new Date();
+        const diffN = ahora - fechaNovios;
+        const d = Math.floor(diffN/(864e5));
+        const dBoda = Math.ceil((fechaBoda-ahora)/864e5);
+        
+        document.getElementById('alertaBoda').innerHTML = dBoda > 0 ? 
+            `💍 Faltan ${dBoda} días para nuestra boda 💍` : `🎉 ¡LLEGÓ EL GRAN DÍA! 🎉`;
+            
+        document.getElementById('contador').innerHTML = `<span style="font-size:2rem">${d} días</span><br><small>de Novios ❤️</small>`;
+    }
+
+    window.ver = (id, btn) => {
+        document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('activa'); 
+        btn.classList.add('active');
+    };
+
+    window.toggleRazon = (el) => {
+        const c = el.nextElementSibling;
+        c.style.maxHeight = c.style.maxHeight ? null : c.scrollHeight + "px";
+    };
+
+    window.canjear = (b) => { 
+        if(!b.classList.contains('usado')){ 
+            confetti({ particleCount: 50, colors: ['#ff4d6d', '#ffffff'] });
+            b.classList.add('usado'); 
+            b.innerText="✅"; 
+        } 
+    };
+
+    setInterval(actualizar, 60000);
+    actualizar();
+    cargarTrivia();
+    window.onload = () => { cambiarFoto(0); };
+</script>
+</body>
+</html>
